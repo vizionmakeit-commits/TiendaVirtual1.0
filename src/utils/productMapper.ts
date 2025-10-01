@@ -29,6 +29,13 @@ export const mapSupabaseProductToApp = (supabaseProduct: SupabaseProduct): AppPr
   const simulatedRating = Math.min(5, Math.max(3, 4 + (Math.random() - 0.5)));
   const simulatedReviews = Math.floor(Math.random() * 50) + 5;
 
+  // Simular atributos para demo si no existen
+  const simulatedAttributes = [
+    { nombre_atributo: 'Granos arábica selectos', valor_atributo: '100%' },
+    { nombre_atributo: 'Tostado artesanal medio', valor_atributo: 'Perfecto' },
+    { nombre_atributo: 'Notas de chocolate', valor_atributo: 'Intensas' },
+    { nombre_atributo: 'Toques de caramelo', valor_atributo: 'Suaves' }
+  ];
   return {
     id: supabaseProduct.id,
     name: supabaseProduct.nombre,
@@ -45,7 +52,13 @@ export const mapSupabaseProductToApp = (supabaseProduct: SupabaseProduct): AppPr
     rating: simulatedRating,
     reviewCount: simulatedReviews,
     tags: supabaseProduct.categoria ? [supabaseProduct.categoria.toLowerCase()] : ['producto'],
-    sku: supabaseProduct.id
+    sku: supabaseProduct.id,
+    // Nuevos campos del backend
+    atributos: simulatedAttributes,
+    en_promocion: supabaseProduct.en_promocion || false,
+    precio_online: supabaseProduct.precio_venta || 0,
+    precio_promocional: supabaseProduct.precio_promocional || undefined,
+    descripcion_larga: supabaseProduct.descripcion_larga || `Esta es nuestra estrella principal, una mezcla única desarrollada durante más de 20 años de experiencia. Utilizamos granos 100% arábica de diferentes regiones de América Latina, tostados artesanalmente hasta alcanzar el punto perfecto que resalta las notas naturales de chocolate belga y caramelo.`
   };
 };
 

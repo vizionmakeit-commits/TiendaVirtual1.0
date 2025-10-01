@@ -14,6 +14,17 @@ export interface Product {
   tags?: string[];
   brand?: string;
   sku?: string;
+  // Nuevas propiedades del backend
+  atributos?: ProductAttribute[];
+  en_promocion?: boolean;
+  precio_online?: number;
+  precio_promocional?: number;
+  descripcion_larga?: string;
+}
+
+export interface ProductAttribute {
+  nombre_atributo: string;
+  valor_atributo: string;
 }
 
 export interface ProductVariant {
@@ -41,4 +52,5 @@ export interface ProductDetailsProps {
   isOpen: boolean;
   onClose: () => void;
   relatedProducts?: Product[];
+  isTransactional?: boolean;
 }

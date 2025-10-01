@@ -21,6 +21,10 @@ export interface Product {
   en_promocion?: boolean;
   precio_promocional?: number;
   created_at: string;
+  atributos?: Array<{
+    nombre_atributo: string;
+    valor_atributo: string;
+  }>;
 }
 
 export interface StorefrontData {

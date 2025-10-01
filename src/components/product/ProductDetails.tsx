@@ -1,54 +1,18 @@
 import React, { useState } from 'react';
-import { X, Minus, Plus, ShoppingCart, Heart, Share2, Truck, Shield, RotateCcw } from 'lucide-react';
-import { Product, ProductDetailsProps } from '../../types/product';
+import { X, Minus, Plus, ShoppingCart, Clock, Thermometer } from 'lucide-react';
+import { Product, ProductDetailsProps, ProductAttribute } from '../../types/product';
 import { useCartContext } from '../../context/CartContext';
 import ImageGallery from './ImageGallery';
 import ProductRating from './ProductRating';
-import ProductReviews from './ProductReviews';
-
-// Sample reviews data
-const sampleReviews = [
-  {
-    id: '1',
-    userId: '1',
-    userName: 'Sarah Johnson',
-    rating: 5,
-    comment: 'Excellent quality and fast delivery. The product exceeded my expectations!',
-    date: '2024-01-15',
-    helpful: 12,
-    verified: true
-  },
-  {
-    id: '2',
-    userId: '2',
-    userName: 'Mike Chen',
-    rating: 4,
-    comment: 'Good value for money. Would recommend to others.',
-    date: '2024-01-10',
-    helpful: 8,
-    verified: true
-  },
-  {
-    id: '3',
-    userId: '3',
-    userName: 'Emma Davis',
-    rating: 5,
-    comment: 'Perfect! Exactly what I was looking for. Great customer service too.',
-    date: '2024-01-08',
-    helpful: 15,
-    verified: false
-  }
-];
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({ 
   product, 
   isOpen, 
   onClose, 
-  relatedProducts = [] 
+  relatedProducts = [],
+  isTransactional = true
 }) => {
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'description' | 'specifications' | 'reviews'>('description');
   const { addItem } = useCartContext();
 
   const handleQuantityChange = (newQuantity: number) => {
@@ -61,16 +25,44 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
     addItem({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: getCurrentPrice(),
       image: product.images[0],
       category: product.category,
       maxStock: product.stock
     });
   };
 
-  const discount = product.originalPrice 
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
+  const getCurrentPrice = () => {
+    if (product.en_promocion && product.precio_promocional) {
+      return product.precio_promocional;
+    }
+    return product.precio_online || product.price;
+  };
+
+  const getOriginalPrice = () => {
+    if (product.en_promocion && product.precio_online) {
+      return product.precio_online;
+    }
+    return product.originalPrice;
+  };
+
+  const getDiscountPercentage = () => {
+    if (product.en_promocion && product.precio_online && product.precio_promocional) {
+      return Math.round(((product.precio_online - product.precio_promocional) / product.precio_online) * 100);
+    }
+    return 0;
+  };
+
+  const renderAttributeIcon = (attributeName: string) => {
+    const name = attributeName.toLowerCase();
+    if (name.includes('tiempo') || name.includes('preparación')) {
+      return <Clock className="w-4 h-4 text-amber-600" />;
+    }
+    if (name.includes('temperatura') || name.includes('intensidad')) {
+      return <Thermometer className="w-4 h-4 text-red-500" />;
+    }
+    return <div className="w-4 h-4 bg-teal-500 rounded-full" />;
+  };
 
   if (!isOpen) return null;
 
@@ -85,38 +77,65 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       {/* Modal */}
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-4">
-          <div className="relative bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
             {/* Close Button */}
             <button
               onClick={onClose}
               className="absolute top-4 right-4 z-10 p-2 bg-white/80 hover:bg-white rounded-full shadow-lg transition-all duration-200"
-              aria-label="Close product details"
+              aria-label="Cerrar detalles del producto"
             >
               <X className="w-5 h-5 text-gray-600" />
             </button>
 
             <div className="overflow-y-auto max-h-[90vh]">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6">
-                {/* Left Column - Images */}
-                <div className="space-y-6">
-                  <ImageGallery images={product.images} productName={product.name} />
+              {/* Main Content - Two Column Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+                {/* Left Column - Image */}
+                <div className="relative bg-gray-50 p-6">
+                  <div className="aspect-square bg-white rounded-xl overflow-hidden shadow-sm">
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  
+                  {/* Badges */}
+                  <div className="absolute top-8 left-8 flex flex-col space-y-2">
+                    <span className="bg-teal-600 text-white text-xs px-3 py-1 rounded-full font-medium shadow-lg">
+                      Signature
+                    </span>
+                    <span className="bg-green-600 text-white text-xs px-3 py-1 rounded-full font-medium shadow-lg">
+                      Popular
+                    </span>
+                  </div>
+
+                  {/* Price Badge */}
+                  <div className="absolute top-8 right-8">
+                    <div className="bg-white rounded-lg px-4 py-2 shadow-lg">
+                      <div className="text-right">
+                        {product.en_promocion && getOriginalPrice() && (
+                          <div className="text-sm text-gray-500 line-through">
+                            ${getOriginalPrice()?.toFixed(2)}
+                          </div>
+                        )}
+                        <div className="text-2xl font-bold text-gray-900">
+                          ${getCurrentPrice().toFixed(2)}
+                        </div>
+                        {product.en_promocion && getDiscountPercentage() > 0 && (
+                          <div className="text-xs text-red-600 font-semibold">
+                            -{getDiscountPercentage()}% OFF
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Right Column - Product Info */}
-                <div className="space-y-6">
-                  {/* Product Header */}
-                  <div>
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full font-medium">
-                        {product.category}
-                      </span>
-                      {discount > 0 && (
-                        <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-medium">
-                          {discount}% OFF
-                        </span>
-                      )}
-                    </div>
-                    
+                <div className="p-6 flex flex-col">
+                  {/* Header */}
+                  <div className="mb-6">
                     <h1 className="text-3xl font-bold text-gray-900 mb-3">
                       {product.name}
                     </h1>
@@ -124,62 +143,71 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                     <ProductRating 
                       rating={product.rating} 
                       reviewCount={product.reviewCount}
-                      size="lg"
+                      size="md"
                     />
                   </div>
 
-                  {/* Price */}
-                  <div className="flex items-center space-x-3">
-                    <span className="text-3xl font-bold text-gray-900">
-                      ${product.price.toFixed(2)}
-                    </span>
-                    {product.originalPrice && (
-                      <span className="text-xl text-gray-500 line-through">
-                        ${product.originalPrice.toFixed(2)}
-                      </span>
-                    )}
+                  {/* Description */}
+                  <div className="mb-6 flex-1">
+                    <p className="text-gray-700 leading-relaxed">
+                      {product.descripcion_larga || product.description}
+                    </p>
                   </div>
 
-                  {/* Stock Status */}
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-3 h-3 rounded-full ${
-                      product.stock > 10 ? 'bg-green-500' : 
-                      product.stock > 0 ? 'bg-yellow-500' : 'bg-red-500'
-                    }`} />
-                    <span className="text-sm text-gray-600">
-                      {product.stock > 10 ? 'In Stock' : 
-                       product.stock > 0 ? `Only ${product.stock} left` : 'Out of Stock'}
-                    </span>
-                  </div>
-
-                  {/* Variants */}
-                  {product.variants && product.variants.length > 0 && (
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                        {product.variants[0].name}
+                  {/* Attributes Section */}
+                  {product.atributos && product.atributos.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <span className="w-2 h-2 bg-teal-500 rounded-full mr-2"></span>
+                        Ingredientes
                       </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {product.variants.map((variant) => (
-                          <button
-                            key={variant.id}
-                            onClick={() => setSelectedVariant(variant.id)}
-                            className={`px-4 py-2 border rounded-lg text-sm font-medium transition-all duration-200 ${
-                              selectedVariant === variant.id
-                                ? 'border-teal-500 bg-teal-50 text-teal-700'
-                                : 'border-gray-300 hover:border-gray-400'
-                            }`}
-                          >
-                            {variant.value}
-                          </button>
+                      <div className="space-y-3">
+                        {product.atributos.map((atributo: ProductAttribute, index: number) => (
+                          <div key={index} className="flex items-center space-x-3">
+                            {renderAttributeIcon(atributo.nombre_atributo)}
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-gray-700">
+                                  {atributo.nombre_atributo}
+                                </span>
+                                <span className="text-sm text-gray-600">
+                                  {atributo.valor_atributo}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Quantity Selector */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Quantity</h3>
-                    <div className="flex items-center space-x-4">
+                  {/* Additional Info */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <Clock className="w-4 h-4 text-amber-600" />
+                        <span className="text-sm font-medium text-gray-700">Tiempo de preparación</span>
+                      </div>
+                      <span className="text-sm text-gray-600">3-4 minutos</span>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <Thermometer className="w-4 h-4 text-red-500" />
+                        <span className="text-sm font-medium text-gray-700">Temperatura</span>
+                      </div>
+                      <span className="text-sm text-gray-600">Hot</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Zone - Conditional */}
+              {isTransactional && (
+                <div className="border-t border-gray-200 p-6 bg-gray-50">
+                  <div className="flex items-center justify-between max-w-md ml-auto">
+                    {/* Quantity Selector */}
+                    <div className="flex items-center space-x-3">
+                      <span className="text-sm font-medium text-gray-700">Cantidad:</span>
                       <div className="flex items-center border border-gray-300 rounded-lg">
                         <button
                           onClick={() => handleQuantityChange(quantity - 1)}
@@ -188,7 +216,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                         >
                           <Minus className="w-4 h-4" />
                         </button>
-                        <span className="px-4 py-2 font-semibold">{quantity}</span>
+                        <span className="px-4 py-2 font-semibold min-w-[3rem] text-center">{quantity}</span>
                         <button
                           onClick={() => handleQuantityChange(quantity + 1)}
                           disabled={quantity >= product.stock}
@@ -197,135 +225,17 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                           <Plus className="w-4 h-4" />
                         </button>
                       </div>
-                      <span className="text-sm text-gray-600">
-                        {product.stock} available
-                      </span>
                     </div>
-                  </div>
 
-                  {/* Action Buttons */}
-                  <div className="space-y-3">
+                    {/* Add to Cart Button */}
                     <button
                       onClick={handleAddToCart}
                       disabled={product.stock === 0}
-                      className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-400 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
+                      className="bg-teal-600 hover:bg-teal-700 disabled:bg-gray-400 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl disabled:cursor-not-allowed disabled:transform-none flex items-center space-x-2"
                     >
                       <ShoppingCart className="w-5 h-5" />
-                      <span>Add to Cart</span>
+                      <span>Añadir al Carrito</span>
                     </button>
-                    
-                    <div className="flex space-x-3">
-                      <button className="flex-1 border border-gray-300 hover:border-gray-400 text-gray-700 py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
-                        <Heart className="w-4 h-4" />
-                        <span>Wishlist</span>
-                      </button>
-                      <button className="flex-1 border border-gray-300 hover:border-gray-400 text-gray-700 py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
-                        <Share2 className="w-4 h-4" />
-                        <span>Share</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Features */}
-                  <div className="border-t border-gray-200 pt-6">
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="flex items-center space-x-3 text-sm text-gray-600">
-                        <Truck className="w-5 h-5 text-teal-600" />
-                        <span>Free shipping on orders over $50</span>
-                      </div>
-                      <div className="flex items-center space-x-3 text-sm text-gray-600">
-                        <RotateCcw className="w-5 h-5 text-teal-600" />
-                        <span>30-day return policy</span>
-                      </div>
-                      <div className="flex items-center space-x-3 text-sm text-gray-600">
-                        <Shield className="w-5 h-5 text-teal-600" />
-                        <span>2-year warranty included</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Product Details Tabs */}
-              <div className="border-t border-gray-200">
-                <div className="px-6">
-                  <div className="flex space-x-8 border-b border-gray-200">
-                    {[
-                      { id: 'description', label: 'Description' },
-                      { id: 'specifications', label: 'Specifications' },
-                      { id: 'reviews', label: 'Reviews' }
-                    ].map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id as any)}
-                        className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                          activeTab === tab.id
-                            ? 'border-teal-500 text-teal-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="px-6 py-6">
-                  {activeTab === 'description' && (
-                    <div className="prose max-w-none">
-                      <p className="text-gray-700 leading-relaxed">
-                        {product.description}
-                      </p>
-                    </div>
-                  )}
-
-                  {activeTab === 'specifications' && (
-                    <div className="space-y-4">
-                      {product.specifications ? (
-                        Object.entries(product.specifications).map(([key, value]) => (
-                          <div key={key} className="flex justify-between py-2 border-b border-gray-100">
-                            <span className="font-medium text-gray-900">{key}</span>
-                            <span className="text-gray-600">{value}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-gray-500">No specifications available.</p>
-                      )}
-                    </div>
-                  )}
-
-                  {activeTab === 'reviews' && (
-                    <ProductReviews
-                      reviews={sampleReviews}
-                      averageRating={product.rating}
-                      totalReviews={product.reviewCount}
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* Related Products */}
-              {relatedProducts.length > 0 && (
-                <div className="border-t border-gray-200 px-6 py-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-6">Related Products</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {relatedProducts.slice(0, 4).map((relatedProduct) => (
-                      <div key={relatedProduct.id} className="group cursor-pointer">
-                        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-3">
-                          <img
-                            src={relatedProduct.images[0]}
-                            alt={relatedProduct.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                        <h4 className="font-medium text-gray-900 text-sm mb-1 line-clamp-2">
-                          {relatedProduct.name}
-                        </h4>
-                        <p className="text-teal-600 font-bold text-sm">
-                          ${relatedProduct.price.toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
                   </div>
                 </div>
               )}
