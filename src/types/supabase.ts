@@ -35,6 +35,17 @@ export interface PublicTenant {
   subdomain: string;
 }
 
+export interface BusinessTenant {
+  id: string;
+  nombre_negocio: string;
+  logo_url?: string;
+  subdomain: string;
+  descripcion?: string;
+  categoria?: string;
+  plan?: string;
+  activo?: boolean;
+}
+
 // Tipos para las funciones RPC de Supabase
 export interface SupabaseRPCFunctions {
   get_storefront_by_subdomain: (args: { subdomain_text: string }) => Promise<StorefrontData>;
