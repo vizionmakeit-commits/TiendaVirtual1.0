@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { useStorefront } from '../hooks/useStorefront';
 import { mapSupabaseProducts } from '../utils/productMapper';
 import { useFilters } from '../hooks/useFilters';
@@ -14,9 +15,10 @@ import { Product } from '../types/product';
 
 interface StorefrontPageProps {
   subdomain: string;
+  onBackToMarketplace?: () => void;
 }
 
-const StorefrontPage: React.FC<StorefrontPageProps> = ({ subdomain }) => {
+const StorefrontPage: React.FC<StorefrontPageProps> = ({ subdomain, onBackToMarketplace }) => {
   const { data, loading, error } = useStorefront(subdomain);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -78,6 +80,21 @@ const StorefrontPage: React.FC<StorefrontPageProps> = ({ subdomain }) => {
   return (
     <CartProvider>
       <div className="min-h-screen bg-gray-900">
+        {/* Botón de regreso */}
+        {onBackToMarketplace && (
+          <div className="bg-gray-800 border-b border-gray-700">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <button
+                onClick={onBackToMarketplace}
+                className="flex items-center space-x-2 py-3 text-gray-300 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Volver al Marketplace</span>
+              </button>
+            </div>
+          </div>
+        )}
+        
         <Header 
           onMenuToggle={handleMenuToggle} 
           onCartToggle={handleCartToggle}

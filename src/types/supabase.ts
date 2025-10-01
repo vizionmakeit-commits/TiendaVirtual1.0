@@ -46,8 +46,15 @@ export interface BusinessTenant {
   activo?: boolean;
 }
 
+export interface BusinessResult {
+  id: string;
+  nombre_negocio: string;
+  logo_url: string | null;
+  subdomain: string;
+}
 // Tipos para las funciones RPC de Supabase
 export interface SupabaseRPCFunctions {
   get_storefront_by_subdomain: (args: { subdomain_text: string }) => Promise<StorefrontData>;
   get_all_public_tenants: () => Promise<PublicTenant[]>;
+  search_tenants_by_name: (args: { search_term: string }) => Promise<BusinessResult[]>;
 }
