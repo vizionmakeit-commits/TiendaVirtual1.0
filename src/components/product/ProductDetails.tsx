@@ -1,22 +1,27 @@
 import React, { useState } from 'react';
 import { X, Minus, Plus, ShoppingCart, Clock, Thermometer } from 'lucide-react';
-import { Product, ProductDetailsProps, ProductAttribute } from '../../types/product';
+import type { Product as SupabaseProduct } from '../../types/supabase';
 import { useCartContext } from '../../context/CartContext';
-import ImageGallery from './ImageGallery';
-import ProductRating from './ProductRating';
+
+interface ProductDetailsProps {
+  product: SupabaseProduct;
+  isOpen: boolean;
+  onClose: () => void;
+  isTransactional?: boolean;
+}
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({ 
   product, 
   isOpen, 
   onClose, 
-  relatedProducts = [],
   isTransactional = true
 }) => {
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCartContext();
 
   const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity >= 1 && newQuantity <= product.stock) {
+    const maxStock = product.stock || 10;
+    if (newQuantity >= 1 && newQuantity <= maxStock) {
       setQuantity(newQuantity);
     }
   };
@@ -24,11 +29,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
   const handleAddToCart = () => {
     addItem({
       id: product.id,
-      name: product.name,
+      name: product.titulo_tienda || product.nombre,
       price: getCurrentPrice(),
-      image: product.images[0],
-      category: product.category,
-      maxStock: product.stock
+      image: product.main_image_url || getDefaultImage(),
+      category: product.categoria || 'Producto',
+      maxStock: product.stock || 10
     });
   };
 
@@ -36,14 +41,14 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
     if (product.en_promocion && product.precio_promocional) {
       return product.precio_promocional;
     }
-    return product.precio_online || product.price;
+    return product.precio_online || 0;
   };
 
   const getOriginalPrice = () => {
     if (product.en_promocion && product.precio_online) {
       return product.precio_online;
     }
-    return product.originalPrice;
+    return undefined;
   };
 
   const getDiscountPercentage = () => {
@@ -51,6 +56,25 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       return Math.round(((product.precio_online - product.precio_promocional) / product.precio_online) * 100);
     }
     return 0;
+  };
+
+  const getDefaultImage = () => {
+    const categoryImages: Record<string, string> = {
+      'Frutas y Verduras': 'https://images.pexels.com/photos/1300972/pexels-photo-1300972.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Panadería': 'https://images.pexels.com/photos/209206/pexels-photo-209206.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Lácteos': 'https://images.pexels.com/photos/773253/pexels-photo-773253.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Carnes': 'https://images.pexels.com/photos/361184/asparagus-steak-veal-steak-veal-361184.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Snacks': 'https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Bebidas': 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Botellas': 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Cocteles': 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Comidas': 'https://images.pexels.com/photos/361184/asparagus-steak-veal-steak-veal-361184.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Entradas': 'https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Tacos y Quesadillas': 'https://images.pexels.com/photos/361184/asparagus-steak-veal-steak-veal-361184.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Tostadas': 'https://images.pexels.com/photos/209206/pexels-photo-209206.jpeg?auto=compress&cs=tinysrgb&w=400'
+    };
+    
+    return categoryImages[product.categoria || ''] || 'https://images.pexels.com/photos/1300972/pexels-photo-1300972.jpeg?auto=compress&cs=tinysrgb&w=400';
   };
 
   const renderAttributeIcon = (attributeName: string) => {
@@ -62,6 +86,23 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       return <Thermometer className="w-4 h-4 text-red-500" />;
     }
     return <div className="w-4 h-4 bg-teal-500 rounded-full" />;
+  };
+
+  const getBadges = () => {
+    const badges = [];
+    
+    // Badge basado en etiquetas
+    if (product.etiquetas && product.etiquetas.length > 0) {
+      badges.push(...product.etiquetas.slice(0, 2)); // Máximo 2 badges
+    } else {
+      // Badges por defecto si no hay etiquetas
+      badges.push('Signature');
+      if (product.en_promocion) {
+        badges.push('Popular');
+      }
+    }
+    
+    return badges;
   };
 
   if (!isOpen) return null;
@@ -94,20 +135,24 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                 <div className="relative bg-gray-50 p-6">
                   <div className="aspect-square bg-white rounded-xl overflow-hidden shadow-sm">
                     <img
-                      src={product.images[0]}
-                      alt={product.name}
+                      src={product.main_image_url || getDefaultImage()}
+                      alt={product.titulo_tienda || product.nombre}
                       className="w-full h-full object-cover"
                     />
                   </div>
                   
-                  {/* Badges */}
+                  {/* Dynamic Badges */}
                   <div className="absolute top-8 left-8 flex flex-col space-y-2">
-                    <span className="bg-teal-600 text-white text-xs px-3 py-1 rounded-full font-medium shadow-lg">
-                      Signature
-                    </span>
-                    <span className="bg-green-600 text-white text-xs px-3 py-1 rounded-full font-medium shadow-lg">
-                      Popular
-                    </span>
+                    {getBadges().map((badge, index) => (
+                      <span 
+                        key={index}
+                        className={`text-white text-xs px-3 py-1 rounded-full font-medium shadow-lg ${
+                          index === 0 ? 'bg-teal-600' : 'bg-green-600'
+                        }`}
+                      >
+                        {badge}
+                      </span>
+                    ))}
                   </div>
 
                   {/* Price Badge */}
@@ -137,24 +182,36 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                   {/* Header */}
                   <div className="mb-6">
                     <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                      {product.name}
+                      {product.titulo_tienda || product.nombre}
                     </h1>
                     
-                    <ProductRating 
-                      rating={product.rating} 
-                      reviewCount={product.reviewCount}
-                      size="md"
-                    />
+                    {/* Simulated Rating - En un futuro esto vendría del backend */}
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <div
+                            key={star}
+                            className={`w-4 h-4 ${
+                              star <= 4.5 ? 'text-yellow-400' : 'text-gray-300'
+                            }`}
+                          >
+                            ★
+                          </div>
+                        ))}
+                      </div>
+                      <span className="font-medium text-gray-900 text-sm">4.5</span>
+                      <span className="text-gray-500 text-sm">(23 reviews)</span>
+                    </div>
                   </div>
 
                   {/* Description */}
                   <div className="mb-6 flex-1">
                     <p className="text-gray-700 leading-relaxed">
-                      {product.descripcion_larga || product.description}
+                      {product.descripcion_larga || `Delicioso ${product.nombre} de la mejor calidad.`}
                     </p>
                   </div>
 
-                  {/* Attributes Section */}
+                  {/* Attributes Section - DATOS REALES */}
                   {product.atributos && product.atributos.length > 0 && (
                     <div className="mb-6">
                       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -162,7 +219,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                         Ingredientes
                       </h3>
                       <div className="space-y-3">
-                        {product.atributos.map((atributo: ProductAttribute, index: number) => (
+                        {product.atributos.map((atributo, index) => (
                           <div key={index} className="flex items-center space-x-3">
                             {renderAttributeIcon(atributo.nombre_atributo)}
                             <div className="flex-1">
@@ -219,7 +276,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                         <span className="px-4 py-2 font-semibold min-w-[3rem] text-center">{quantity}</span>
                         <button
                           onClick={() => handleQuantityChange(quantity + 1)}
-                          disabled={quantity >= product.stock}
+                          disabled={quantity >= (product.stock || 10)}
                           className="p-2 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                           <Plus className="w-4 h-4" />
@@ -230,7 +287,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                     {/* Add to Cart Button */}
                     <button
                       onClick={handleAddToCart}
-                      disabled={product.stock === 0}
+                      disabled={(product.stock || 10) === 0}
                       className="bg-teal-600 hover:bg-teal-700 disabled:bg-gray-400 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl disabled:cursor-not-allowed disabled:transform-none flex items-center space-x-2"
                     >
                       <ShoppingCart className="w-5 h-5" />

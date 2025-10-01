@@ -25,6 +25,13 @@ export interface Product {
     nombre_atributo: string;
     valor_atributo: string;
   }>;
+  titulo_tienda?: string;
+  precio_online?: number;
+  etiquetas?: string[];
+  atributos?: Array<{
+    nombre_atributo: string;
+    valor_atributo: string;
+  }>;
 }
 
 export interface StorefrontData {

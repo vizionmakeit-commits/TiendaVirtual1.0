@@ -12,6 +12,7 @@ import ProductDetails from './product/ProductDetails';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
 import { Product } from '../types/product';
+import type { Product as SupabaseProduct } from '../types/supabase';
 
 interface StorefrontPageProps {
   subdomain: string;
@@ -22,7 +23,7 @@ const StorefrontPage: React.FC<StorefrontPageProps> = ({ subdomain, onBackToMark
   const { data, loading, error } = useStorefront(subdomain);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<SupabaseProduct | null>(null);
 
   // Mapear productos de Supabase al formato de la app
   const mappedProducts = data ? mapSupabaseProducts(data.products) : [];
@@ -57,7 +58,11 @@ const StorefrontPage: React.FC<StorefrontPageProps> = ({ subdomain, onBackToMark
   };
 
   const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
+    // Encontrar el producto original de Supabase
+    const originalProduct = data?.products.find(p => p.id === product.id);
+    if (originalProduct) {
+      setSelectedProduct(originalProduct);
+    }
   };
 
   const handleCloseProductDetails = () => {
