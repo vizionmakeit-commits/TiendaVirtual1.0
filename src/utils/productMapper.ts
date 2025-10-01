@@ -29,20 +29,13 @@ export const mapSupabaseProductToApp = (supabaseProduct: SupabaseProduct): AppPr
   const simulatedRating = Math.min(5, Math.max(3, 4 + (Math.random() - 0.5)));
   const simulatedReviews = Math.floor(Math.random() * 50) + 5;
 
-  // Simular atributos para demo si no existen
-  const simulatedAttributes = [
-    { nombre_atributo: 'Granos arábica selectos', valor_atributo: '100%' },
-    { nombre_atributo: 'Tostado artesanal medio', valor_atributo: 'Perfecto' },
-    { nombre_atributo: 'Notas de chocolate', valor_atributo: 'Intensas' },
-    { nombre_atributo: 'Toques de caramelo', valor_atributo: 'Suaves' }
-  ];
   return {
     id: supabaseProduct.id,
-    name: supabaseProduct.nombre,
+    name: supabaseProduct.titulo_tienda || supabaseProduct.nombre,
     description: supabaseProduct.descripcion_larga || `Delicioso ${supabaseProduct.nombre} de la mejor calidad.`,
-    price: supabaseProduct.precio_venta || 0,
+    price: supabaseProduct.precio_online || supabaseProduct.precio_venta || 0,
     originalPrice: supabaseProduct.en_promocion && supabaseProduct.precio_promocional 
-      ? supabaseProduct.precio_venta 
+      ? supabaseProduct.precio_online || supabaseProduct.precio_venta
       : undefined,
     images: supabaseProduct.main_image_url 
       ? [supabaseProduct.main_image_url, getDefaultImage(supabaseProduct.categoria)]
@@ -54,9 +47,9 @@ export const mapSupabaseProductToApp = (supabaseProduct: SupabaseProduct): AppPr
     tags: supabaseProduct.categoria ? [supabaseProduct.categoria.toLowerCase()] : ['producto'],
     sku: supabaseProduct.id,
     // Nuevos campos del backend
-    atributos: simulatedAttributes,
+    atributos: supabaseProduct.atributos || [],
     en_promocion: supabaseProduct.en_promocion || false,
-    precio_online: supabaseProduct.precio_venta || 0,
+    precio_online: supabaseProduct.precio_online || supabaseProduct.precio_venta || 0,
     precio_promocional: supabaseProduct.precio_promocional || undefined,
     descripcion_larga: supabaseProduct.descripcion_larga || `Esta es nuestra estrella principal, una mezcla única desarrollada durante más de 20 años de experiencia. Utilizamos granos 100% arábica de diferentes regiones de América Latina, tostados artesanalmente hasta alcanzar el punto perfecto que resalta las notas naturales de chocolate belga y caramelo.`
   };

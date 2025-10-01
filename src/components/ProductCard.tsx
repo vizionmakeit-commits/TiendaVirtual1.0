@@ -32,7 +32,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onProductClick }) =>
     setTimeout(() => {
       addItem({
         id: product.id,
-        name: product.name,
+        name: product.name, // Este ya viene mapeado correctamente del productMapper
         price: product.price,
         image: product.image,
         category: product.category,
@@ -61,7 +61,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onProductClick }) =>
       {/* Imagen del producto */}
       <div className="relative overflow-hidden h-48">
         <img
-          src={product.image}
+          src={product.images[0]}
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />

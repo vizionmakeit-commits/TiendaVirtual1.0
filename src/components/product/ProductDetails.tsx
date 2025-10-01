@@ -212,11 +212,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                   </div>
 
                   {/* Attributes Section - DATOS REALES */}
-                  {product.atributos && product.atributos.length > 0 && (
+                  {product.atributos && product.atributos.length > 0 ? (
                     <div className="mb-6">
                       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <span className="w-2 h-2 bg-teal-500 rounded-full mr-2"></span>
-                        Ingredientes
+                        Datos Destacados
                       </h3>
                       <div className="space-y-3">
                         {product.atributos.map((atributo, index) => (
@@ -236,25 +236,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                         ))}
                       </div>
                     </div>
-                  )}
-
-                  {/* Additional Info */}
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <Clock className="w-4 h-4 text-amber-600" />
-                        <span className="text-sm font-medium text-gray-700">Tiempo de preparación</span>
-                      </div>
-                      <span className="text-sm text-gray-600">3-4 minutos</span>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <Thermometer className="w-4 h-4 text-red-500" />
-                        <span className="text-sm font-medium text-gray-700">Temperatura</span>
-                      </div>
-                      <span className="text-sm text-gray-600">Hot</span>
-                    </div>
-                  </div>
+                  ) : null}
                 </div>
               </div>
 
