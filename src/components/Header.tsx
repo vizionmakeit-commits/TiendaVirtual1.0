@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, User, ShoppingCart, Menu, X } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useCartContext } from '../context/CartContext';
 
 interface HeaderProps {
@@ -19,6 +20,7 @@ const Header: React.FC<HeaderProps> = ({
   storeName = "FreshMart",
   logoUrl
 }) => {
+  const { t } = useLanguage();
   const { itemCount } = useCartContext();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,7 +67,7 @@ const Header: React.FC<HeaderProps> = ({
                 type="text"
                 value={searchTerm}
                 onChange={handleSearchChange}
-                placeholder="Buscar productos..."
+                placeholder={t('search.placeholder')}
                 className="w-full pl-10 pr-3 py-2 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
               />
               {searchTerm && (
@@ -83,14 +85,14 @@ const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center space-x-4">
             <button className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
               <User className="h-5 w-5" />
-              <span className="hidden sm:block">Cuenta</span>
+              <span className="hidden sm:block">{t('header.account')}</span>
             </button>
             <button
               onClick={onCartToggle}
               className="flex items-center space-x-2 px-4 py-2 bg-teal-600 rounded-lg hover:bg-teal-700 transition-all duration-200 hover:scale-105 active:scale-95 relative group"
             >
               <ShoppingCart className="h-5 w-5" />
-              <span className="hidden sm:block">Carrito</span>
+              <span className="hidden sm:block">{t('header.cart')}</span>
               {itemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-xs text-white px-2 py-1 rounded-full min-w-[20px] h-5 flex items-center justify-center font-bold shadow-lg animate-pulse group-hover:animate-none transition-all duration-200">
                   {itemCount > 99 ? '99+' : itemCount}
@@ -110,7 +112,7 @@ const Header: React.FC<HeaderProps> = ({
               type="text"
               value={searchTerm}
               onChange={handleSearchChange}
-              placeholder="Buscar productos..."
+              placeholder={t('search.placeholder')}
               className="w-full pl-10 pr-10 py-2 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             />
             {searchTerm && (
