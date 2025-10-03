@@ -1,9 +1,9 @@
-import React from 'react';
+import { FC } from 'react';
 import { Sun, Moon, Globe } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
-const ThemeLanguageControls: React.FC = () => {
+const ThemeLanguageControls: FC = () => {
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage } = useLanguage();
 

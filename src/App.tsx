@@ -3,6 +3,9 @@ import { useState } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import ThemeLanguageControls from './components/ThemeLanguageControls';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { LanguageProvider } from './contexts/LanguageContext';
+import ThemeLanguageControls from './components/ThemeLanguageControls';
 import MarketplacePage from './components/MarketplacePage';
 import StorefrontPage from './components/StorefrontPage';
 
@@ -28,6 +31,9 @@ function App() {
           />
         ) : (
           <MarketplacePage onBusinessSelect={handleBusinessSelect} />
+        )}
+      </LanguageProvider>
+    </ThemeProvider>
         )}
       </LanguageProvider>
     </ThemeProvider>
