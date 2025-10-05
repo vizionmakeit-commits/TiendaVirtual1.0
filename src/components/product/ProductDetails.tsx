@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Minus, Plus, ShoppingCart, Clock, Thermometer } from 'lucide-react';
+import { X, Minus, Plus, ShoppingCart } from 'lucide-react';
 import type { Product as SupabaseProduct } from '../../types/supabase';
 import { useCartContext } from '../../context/CartContext';
 
@@ -79,12 +79,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
   const renderAttributeIcon = (attributeName: string) => {
     const name = attributeName.toLowerCase();
-    if (name.includes('tiempo') || name.includes('preparación')) {
-      return <Clock className="w-4 h-4 text-amber-600" />;
-    }
-    if (name.includes('temperatura') || name.includes('intensidad')) {
-      return <Thermometer className="w-4 h-4 text-red-500" />;
-    }
     return <div className="w-4 h-4 bg-teal-500 rounded-full" />;
   };
 
@@ -278,24 +272,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                           onClick={() => handleQuantityChange(quantity + 1)}
                           disabled={quantity >= (product.stock || 10)}
                           className="p-2 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Add to Cart Button */}
-                    <button
-                      onClick={handleAddToCart}
-                      disabled={(product.stock || 10) === 0}
-                      className="bg-teal-600 hover:bg-teal-700 disabled:bg-gray-400 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl disabled:cursor-not-allowed disabled:transform-none flex items-center space-x-2"
-                    >
-                      <ShoppingCart className="w-5 h-5" />
-                      <span>Añadir al Carrito</span>
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>

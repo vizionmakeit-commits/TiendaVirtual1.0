@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useStorefront } from '../hooks/useStorefront';
 import { mapSupabaseProducts } from '../utils/productMapper';
-import { useFilters } from '../hooks/useFilters';
 import { CartProvider } from '../context/CartContext';
 import Header from './Header';
-import Sidebar from './Sidebar';
 import ProductGrid from './ProductGrid';
 import ShoppingCart from './cart/ShoppingCart';
 import ProductDetails from './product/ProductDetails';
@@ -21,32 +19,22 @@ interface StorefrontPageProps {
 
 const StorefrontPage: React.FC<StorefrontPageProps> = ({ subdomain, onBackToMarketplace }) => {
   const { data, loading, error } = useStorefront(subdomain);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<SupabaseProduct | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Mapear productos de Supabase al formato de la app
   const mappedProducts = data ? mapSupabaseProducts(data.products) : [];
 
-  // Initialize filters with mapped products
-  const {
-    filters,
-    filteredProducts,
-    updateSearch,
-    toggleCategory,
-    updatePriceRange,
-    updateSortBy,
-    toggleOnSale,
-    clearFilters,
-    activeFiltersCount
-  } = useFilters(mappedProducts);
+  // Filtrar productos por término de búsqueda
+  const filteredProducts = mappedProducts.filter(product =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const handleMenuToggle = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleSidebarClose = () => {
-    setSidebarOpen(false);
+  const handleSearchChange = (term: string) => {
+    setSearchTerm(term);
   };
 
   const handleCartToggle = () => {
@@ -101,36 +89,20 @@ const StorefrontPage: React.FC<StorefrontPageProps> = ({ subdomain, onBackToMark
         )}
         
         <Header 
-          onMenuToggle={handleMenuToggle} 
+          onMenuToggle={() => {}} 
           onCartToggle={handleCartToggle}
-          searchTerm={filters.searchTerm}
-          onSearchChange={updateSearch}
+          searchTerm={searchTerm}
+          onSearchChange={handleSearchChange}
           storeName={data.store.nombre_negocio}
           logoUrl={data.store.logo_url}
         />
         
-        <div className="flex">
-          <Sidebar 
-            isOpen={sidebarOpen} 
-            onClose={handleSidebarClose}
-            selectedCategories={filters.selectedCategories}
-            onToggleCategory={toggleCategory}
-            priceRange={filters.priceRange}
-            onPriceRangeChange={updatePriceRange}
-            sortBy={filters.sortBy}
-            onSortChange={updateSortBy}
-            showOnSale={filters.showOnSale}
-            onToggleOnSale={toggleOnSale}
-            activeFiltersCount={activeFiltersCount}
-            onClearFilters={clearFilters}
-          />
-          <ProductGrid 
-            products={filteredProducts}
-            searchTerm={filters.searchTerm}
-            onProductClick={handleProductClick}
-            storeName={data.store.nombre_negocio}
-          />
-        </div>
+        <ProductGrid 
+          products={filteredProducts}
+          searchTerm={searchTerm}
+          onProductClick={handleProductClick}
+          storeName={data.store.nombre_negocio}
+        />
 
         <ShoppingCart 
           isOpen={cartOpen}
