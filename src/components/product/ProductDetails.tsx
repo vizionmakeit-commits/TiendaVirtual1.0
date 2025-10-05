@@ -34,7 +34,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       image: product.main_image_url || getDefaultImage(),
       category: product.categoria || 'Producto',
       maxStock: product.stock || 10
-    });
+    }, quantity);
   };
 
   const getCurrentPrice = () => {
@@ -79,12 +79,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
   const renderAttributeIcon = (attributeName: string) => {
     const name = attributeName.toLowerCase();
-    if (name.includes('tiempo') || name.includes('preparación')) {
-      return <Clock className="w-4 h-4 text-amber-600" />;
-    }
-    if (name.includes('temperatura') || name.includes('intensidad')) {
-      return <Thermometer className="w-4 h-4 text-red-500" />;
-    }
     return <div className="w-4 h-4 bg-teal-500 rounded-full" />;
   };
 
@@ -287,11 +281,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                     {/* Add to Cart Button */}
                     <button
                       onClick={handleAddToCart}
-                      disabled={(product.stock || 10) === 0}
-                      className="bg-teal-600 hover:bg-teal-700 disabled:bg-gray-400 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl disabled:cursor-not-allowed disabled:transform-none flex items-center space-x-2"
+                      className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center space-x-2 transition-colors"
                     >
                       <ShoppingCart className="w-5 h-5" />
-                      <span>Añadir al Carrito</span>
+                      <span>Agregar al carrito</span>
                     </button>
                   </div>
                 </div>
