@@ -1,6 +1,5 @@
 import React from 'react';
 import { Search, Loader2 } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
 import { useBusinessSearch } from '../hooks/useBusinessSearch';
 import BusinessCard from './BusinessCard';
 
@@ -9,7 +8,6 @@ interface MarketplacePageProps {
 }
 
 const MarketplacePage: React.FC<MarketplacePageProps> = ({ onBusinessSelect }) => {
-  const { t } = useLanguage();
   const { searchTerm, setSearchTerm, results, isLoading, error } = useBusinessSearch();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,11 +45,11 @@ const MarketplacePage: React.FC<MarketplacePageProps> = ({ onBusinessSelect }) =
         {/* Bienvenida */}
         <div className="space-y-6">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            {t('marketplace.welcome')}
+            Bienvenido
           </h2>
           
           <p className="text-xl md:text-2xl text-gray-300 font-light">
-            {t('marketplace.subtitle')}
+            Descubre lo mejor de Los Cabos
           </p>
           
           {/* Input de búsqueda */}
@@ -68,7 +66,7 @@ const MarketplacePage: React.FC<MarketplacePageProps> = ({ onBusinessSelect }) =
                 type="text"
                 value={searchTerm}
                 onChange={handleSearchChange}
-                placeholder={t('marketplace.search.placeholder')}
+                placeholder="Busca un negocio..."
                 className="w-full pl-12 pr-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-200"
               />
             </div>
@@ -84,14 +82,14 @@ const MarketplacePage: React.FC<MarketplacePageProps> = ({ onBusinessSelect }) =
             
             {searchTerm.length > 2 && !isLoading && results.length === 0 && !error && (
               <div className="text-gray-400 text-sm">
-                {t('marketplace.no.results')} "{searchTerm}"
+                No se encontraron resultados para "{searchTerm}"
               </div>
             )}
             
             {results.length > 0 && (
               <div className="space-y-3">
                 <div className="text-gray-300 text-sm mb-4">
-                  {results.length} {results.length === 1 ? t('marketplace.businesses.found') : t('marketplace.businesses.found.plural')}
+                  {results.length} negocio{results.length !== 1 ? 's' : ''} encontrado{results.length !== 1 ? 's' : ''}
                 </div>
                 {results.map((business) => (
                   <BusinessCard
@@ -114,7 +112,7 @@ const MarketplacePage: React.FC<MarketplacePageProps> = ({ onBusinessSelect }) =
 
         {/* Información adicional */}
         <div className="mt-12 text-gray-400 text-sm">
-          <p>{t('marketplace.platform.description')}</p>
+          <p>Tu plataforma de comercio local</p>
         </div>
       </div>
     </div>

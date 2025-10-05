@@ -1,5 +1,3 @@
-import { useState, useEffect } from 'react';
-
 export interface RouteInfo {
   mode: 'storefront' | 'marketplace';
   subdomain?: string;
@@ -99,9 +97,9 @@ export function generateStorefrontUrl(subdomain: string): string {
  * Hook para obtener información de ruta de forma reactiva
  */
 export function useRouteInfo(): RouteInfo {
-  const [routeInfo, setRouteInfo] = useState<RouteInfo>(() => getRouteInfo());
+  const [routeInfo, setRouteInfo] = React.useState<RouteInfo>(() => getRouteInfo());
   
-  useEffect(() => {
+  React.useEffect(() => {
     const handleLocationChange = () => {
       setRouteInfo(getRouteInfo());
     };
