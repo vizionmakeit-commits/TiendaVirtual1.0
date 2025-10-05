@@ -40,9 +40,7 @@ export const mapSupabaseProductToApp = (supabaseProduct: SupabaseProduct): AppPr
     id: supabaseProduct.id,
     name: supabaseProduct.nombre,
     description: supabaseProduct.descripcion_larga || `Delicioso ${supabaseProduct.nombre} de la mejor calidad.`,
-    price: supabaseProduct.en_promocion && supabaseProduct.precio_promocional 
-      ? supabaseProduct.precio_promocional 
-      : supabaseProduct.precio_venta || 0,
+    price: supabaseProduct.precio_venta || 0,
     originalPrice: supabaseProduct.en_promocion && supabaseProduct.precio_promocional 
       ? supabaseProduct.precio_venta 
       : undefined,
