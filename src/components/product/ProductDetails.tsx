@@ -34,7 +34,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       image: product.main_image_url || getDefaultImage(),
       category: product.categoria || 'Producto',
       maxStock: product.stock || 10
-    });
+    }, quantity);
   };
 
   const getCurrentPrice = () => {
@@ -79,12 +79,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
   const renderAttributeIcon = (attributeName: string) => {
     const name = attributeName.toLowerCase();
-    if (name.includes('tiempo') || name.includes('preparación')) {
-      return <Clock className="w-4 h-4 text-amber-600" />;
-    }
-    if (name.includes('temperatura') || name.includes('intensidad')) {
-      return <Thermometer className="w-4 h-4 text-red-500" />;
-    }
     return <div className="w-4 h-4 bg-teal-500 rounded-full" />;
   };
 
